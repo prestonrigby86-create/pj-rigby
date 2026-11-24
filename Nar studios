@@ -1,6 +1,7 @@
 
 --========================================
---       NAR STUDIOS BRANDING SYSTEM
+--          NAR STUDIOS
+--       NAR LIBRARY OVERRIDE
 --========================================
 
 local Players = game:GetService("Players")
@@ -8,14 +9,73 @@ local CoreGui = game:GetService("CoreGui")
 
 local Player = Players.LocalPlayer
 
-local REPLACEMENTS = {
+local Replacements = {
+    -- Library branding
     ["Exter Library"] = "Nar Library",
+
+    -- Developer branding
     ["Developed by"] = "By Nar Studios",
     ["Made by"] = "By Nar Studios",
     ["Created by"] = "By Nar Studios",
+
+    -- English translations
+    ["untuk buka/tutup menu"] = "To open/close menu",
+
+    ["Buka atau tutup menu secara manual"] =
+        "Manually open or close the menu",
+
+    ["Lepas GUI dari sesi saat ini"] =
+        "Unload GUI from current session",
+
+    ["Pilih tema warna antarmuka"] =
+        "Choose interface color theme",
+
+    ["Border jendela berputar mengikuti warna tema"] =
+        "Window border cycles through theme colors",
+
+    ["Semburat warna tema di latar jendela"] =
+        "Theme-colored glow in window background",
+
+    ["Blur latar game saat menu terbuka"] =
+        "Blur game background when menu is open",
+
+    ["Tampilkan FPS, ping, dan jam di pojok layar"] =
+        "Display FPS, ping, and clock in screen corner",
 }
 
-local function ReplaceText(object)
+-- Plain text replacement
+local function ReplaceText(original)
+    local updated = original
+
+    for oldText, newText in pairs(Replacements) do
+        local startPosition = 1
+
+        while true do
+            local first, last = updated:find(
+                oldText,
+                startPosition,
+                true
+            )
+
+            if not first then
+                break
+            end
+
+            updated =
+                updated:sub(1, first - 1)
+                .. newText
+                .. updated:sub(last + 1)
+
+            startPosition = first + #newText
+        end
+    end
+
+    return updated
+end
+
+-- Process UI objects
+local function ProcessObject(object)
+
     if not (
         object:IsA("TextLabel")
         or object:IsA("TextButton")
@@ -25,44 +85,45 @@ local function ReplaceText(object)
     end
 
     local original = object.Text
-    local updated = original
+    local updated = ReplaceText(original)
 
-    for oldName, newName in pairs(REPLACEMENTS) do
-        updated = updated:gsub(
-            oldName,
-            newName
-        )
-    end
-
-    if updated ~= original then
+    if original ~= updated then
         object.Text = updated
     end
 end
 
-local function Scan(container)
+-- Scan existing UI
+local function ScanUI(container)
+
     for _, object in ipairs(container:GetDescendants()) do
-        ReplaceText(object)
+        ProcessObject(object)
     end
 
+    -- Monitor new UI objects
     container.DescendantAdded:Connect(function(object)
+
         task.defer(function()
-            ReplaceText(object)
+            ProcessObject(object)
         end)
+
     end)
 end
 
--- Scan both UI containers
-Scan(CoreGui)
+-- Scan both interfaces
+ScanUI(CoreGui)
 
 local PlayerGui = Player:WaitForChild("PlayerGui")
-Scan(PlayerGui)
+ScanUI(PlayerGui)
 
+-- Startup message
 print("================================")
 print("       NAR STUDIOS")
-print("     BRANDING LOADED")
 print("================================")
-print("Exter Library -> Nar Library")
-print("Developer credit -> By Nar Studios")
+print("Library: Nar Library")
+print("Branding: By Nar Studios")
+print("Translations: English")
+print("UI Scanner: Active")
+print("================================")
 
 
 local Release = "v1.3.0"
