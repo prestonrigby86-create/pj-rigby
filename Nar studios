@@ -1,12 +1,21 @@
 
+--========================================
+--       NAR STUDIOS BRANDING SYSTEM
+--========================================
 
 local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
 
-local OLD_NAME = "Exter Library"
-local NEW_NAME = "Nar Library"
+local Player = Players.LocalPlayer
 
-local function ReplaceName(object)
+local REPLACEMENTS = {
+    ["Exter Library"] = "Nar Library",
+    ["Developed by"] = "By Nar Studios",
+    ["Made by"] = "By Nar Studios",
+    ["Created by"] = "By Nar Studios",
+}
+
+local function ReplaceText(object)
     if not (
         object:IsA("TextLabel")
         or object:IsA("TextButton")
@@ -16,83 +25,44 @@ local function ReplaceName(object)
     end
 
     local original = object.Text
+    local updated = original
 
-    if original:lower():find(OLD_NAME:lower(), 1, true) then
-        object.Text = original:gsub(
-            "[Ee][Xx][Tt][Ee][Rr] [Ll][Ii][Bb][Rr][Aa][Rr][Yy]",
-            NEW_NAME
+    for oldName, newName in pairs(REPLACEMENTS) do
+        updated = updated:gsub(
+            oldName,
+            newName
         )
+    end
+
+    if updated ~= original then
+        object.Text = updated
     end
 end
 
 local function Scan(container)
     for _, object in ipairs(container:GetDescendants()) do
-        ReplaceName(object)
+        ReplaceText(object)
     end
 
     container.DescendantAdded:Connect(function(object)
         task.defer(function()
-            ReplaceName(object)
+            ReplaceText(object)
         end)
     end)
 end
 
+-- Scan both UI containers
 Scan(CoreGui)
-Scan(Players.LocalPlayer:WaitForChild("PlayerGui"))
 
-print("[Nar Studios] Exter Library renamed to Nar Library!")
+local PlayerGui = Player:WaitForChild("PlayerGui")
+Scan(PlayerGui)
 
-
-local Players = game:GetService("Players")
-local CoreGui = game:GetService("CoreGui")
-
-local BRAND_TEXT = "By Nar Studios"
-
-local function ReplaceCredits(container)
-    for _, object in ipairs(container:GetDescendants()) do
-        if object:IsA("TextLabel") or object:IsA("TextButton") then
-            local text = object.Text:lower()
-
-            if text:find("developed by")
-            or text:find("made by")
-            or text:find("created by")
-            or text:match("^by%s") then
-
-                object.Text = BRAND_TEXT
-            end
-        end
-    end
-end
-
--- Scan existing interfaces
-ReplaceCredits(CoreGui)
-
-local playerGui = Players.LocalPlayer:WaitForChild("PlayerGui")
-ReplaceCredits(playerGui)
-
--- Detect newly created interface elements
-local function WatchUI(container)
-    container.DescendantAdded:Connect(function(object)
-        task.wait(0.1)
-
-        if object:IsA("TextLabel") or object:IsA("TextButton") then
-            local text = object.Text:lower()
-
-            if text:find("developed by")
-            or text:find("made by")
-            or text:find("created by")
-            or text:match("^by%s") then
-
-                object.Text = BRAND_TEXT
-            end
-        end
-    end)
-end
-
-WatchUI(CoreGui)
-WatchUI(playerGui)
-
-print("Nar Studios branding loaded!")
+print("================================")
+print("       NAR STUDIOS")
+print("     BRANDING LOADED")
+print("================================")
+print("Exter Library -> Nar Library")
+print("Developer credit -> By Nar Studios")
 
 
 local Release = "v1.3.0"
