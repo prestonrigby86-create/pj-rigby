@@ -3,6 +3,49 @@
 local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
 
+local OLD_NAME = "Exter Library"
+local NEW_NAME = "Nar Library"
+
+local function ReplaceName(object)
+    if not (
+        object:IsA("TextLabel")
+        or object:IsA("TextButton")
+        or object:IsA("TextBox")
+    ) then
+        return
+    end
+
+    local original = object.Text
+
+    if original:lower():find(OLD_NAME:lower(), 1, true) then
+        object.Text = original:gsub(
+            "[Ee][Xx][Tt][Ee][Rr] [Ll][Ii][Bb][Rr][Aa][Rr][Yy]",
+            NEW_NAME
+        )
+    end
+end
+
+local function Scan(container)
+    for _, object in ipairs(container:GetDescendants()) do
+        ReplaceName(object)
+    end
+
+    container.DescendantAdded:Connect(function(object)
+        task.defer(function()
+            ReplaceName(object)
+        end)
+    end)
+end
+
+Scan(CoreGui)
+Scan(Players.LocalPlayer:WaitForChild("PlayerGui"))
+
+print("[Nar Studios] Exter Library renamed to Nar Library!")
+
+
+local Players = game:GetService("Players")
+local CoreGui = game:GetService("CoreGui")
+
 local BRAND_TEXT = "By Nar Studios"
 
 local function ReplaceCredits(container)
